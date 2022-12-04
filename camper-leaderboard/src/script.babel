@@ -1,0 +1,56 @@
+class App extends React.Component {
+  state = {
+    alltimeUsers: [],
+    recentUsers: [],
+    show: 'alltime',
+  }
+
+  componentDidMount() {
+    fetch('https://fcctop100.herokuapp.com/api/fccusers/top/alltime')
+      .then(data => data.json())
+      .then(data => this.setState({alltimeUsers: data}))
+      .catch(error => console.log(error))
+  
+    fetch('https://fcctop100.herokuapp.com/api/fccusers/top/recent')
+      .then(data => data.json())
+      .then(data => this.setState({recentUsers: data}))
+      .catch(error => console.log(error))
+  }
+
+  toggleView = (evt) => {
+    this.setState({
+      show: evt.target.id
+    })
+  }
+
+  render() {
+    const sortedUsers = this.state.show ===  'recent' ? this.state.recentUsers.sort((a,b) => b.recent - a.recent) : this.state.alltimeUsers.sort((a,b) => b.alltime - a.alltime)
+    const usernames = sortedUsers.map((user, idx) => 
+      <div className='user' key={idx}>
+        <div className='' >
+          <img src={user.img} alt=""/>
+          <div className='username' >{user.username}</div>
+        </div>
+
+        <div className={this.state.show !== 'recent' ? 'green' : null} >{user.recent}</div>
+        <div className={this.state.show !== 'alltime' ? 'green' : null} >{user.alltime}</div>
+      </div>
+    )
+    return (
+      <div className='container'>
+        <h2>Camper Leader Board</h2>
+          <div className='user header'>
+          <div>User</div>
+          <div className={`sort-button ${this.state.show !== 'recent' ? 'green-bg' : null}`} id='alltime' onClick={this.toggleView} >All Time</div>
+          <div className={`sort-button ${this.state.show !== 'alltime' ? 'green-bg' : null}`} id='recent' onClick={this.toggleView} >Recent</div>
+          </div>
+          {usernames}
+      </div>
+      
+      
+    );
+  }
+}
+
+
+ReactDOM.render(<App />, document.getElementById('root'));

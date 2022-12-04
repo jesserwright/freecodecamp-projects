@@ -1,0 +1,96 @@
+
+body {
+  background-color: #f2f2f2;
+  font-family: Myriad Pro;
+  font-size: 24pt;
+  user-select: none;
+}
+
+.calc-body {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  justify-content: center;
+  width: min-content;
+  color: #f2f2f2;
+  background-color: #ffffff;
+  margin: auto;
+  margin-top: 4em;
+  border-radius: .2em;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.result-area, .formula-area {
+  grid-column: span 4;
+  text-align: right;
+  padding: .25em;
+  height: 1em;
+}
+.formula-area {
+  color: #5C5C5C;
+  font-size: 1.8em;
+}
+.result-area {
+  color: #646464;
+  grid-row: span 3;
+  font-weight: lighter;
+}
+
+.button-dark {
+  background-color: #4E4E4E;
+}
+
+.button-light {
+  background-color: #727272;
+}
+
+.button {
+  width: 3em;
+  height: 2.5em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  width: 1em;
+  height: 1em;
+  background-color: #656565;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  top: .7em;
+  left: 1em;
+  border-radius: 100%;
+  z-index: -1;
+}
+
+.button:hover {
+  transform: scale(1, 1);
+}
+
+.button:hover::after {
+  opacity: 1;
+  transform: scale(2.1, 2.1);
+}
+
+.button:active {
+  color: #333333;
+}
+
+#EQUALS {
+  text-align: center;
+  color: #333333;
+  font-size: 1.5em;
+  grid-column: span 4;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 0em 0em .2em .2em;
+  transition: all 0.1s;
+}
+
+#EQUALS:hover {
+  background-color: #f2f2f2;
+}

@@ -1,0 +1,72 @@
+class App extends React.Component {
+  state = {
+    wikiData: [],
+  }
+
+  handleQuery = (evt) => {
+    const queryNow = evt.target.value
+    fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&origin=*&search=${queryNow}&format=json`)
+      .then(data => data.json())
+      .then(data => this.setState({wikiData: data}))
+  }
+
+  handleSubmit = (evt) => {
+
+  }
+
+  render() {
+    const isData = this.state.wikiData.length > 0
+
+    const renderedTitles = isData && (
+    this.state.wikiData[1].map((val, idx) =>
+      (<h4 key={val}>{val} <i className="chevron right icon"></i></h4>)
+    ))
+    const renderedParagraphs = isData && (
+    this.state.wikiData[2].map((val, idx) =>
+      (<p key={val}>{val.slice(0,100)}...</p>)
+    ))
+
+    const renderedWikiData = isData && (
+    this.state.wikiData[3].map((val, idx) =>
+      (
+      <div className='ui left aligned segment' key={`${idx}-result`}>
+        <a key={val} href={val}>
+        {renderedTitles[idx]}
+        {renderedParagraphs[idx]}
+        </a>
+      </div>
+
+      )
+    ))
+    return (
+      <div className='element-main'>
+        <h2>Wikipedia Search <i className="search icon"></i></h2>
+
+        <div className="ui icon input small">
+          <input onChange={this.handleQuery} className="prompt" type="text" placeholder="Search...">
+          </input>
+          <i className="search icon"></i>
+        </div>
+
+        <div className='ui divider hidden'></div>
+
+      {
+        !isData && (
+          <button className="ui basic right labeled icon button tiny">
+            <i className="question icon"></i>
+            <a href='https://en.wikipedia.org/wiki/Special:Random'>Random Article</a>
+          </button>
+        )
+      }
+
+        <div className=''>
+          <div>{renderedWikiData}</div>
+        </div>
+
+
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));

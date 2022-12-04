@@ -1,0 +1,65 @@
+body {
+  background-color: #f2f2f2;
+}
+
+.container {
+  background-color: white;
+  margin: auto;
+  margin-top: 1em;
+  border-radius: 1em;
+  padding: 1em;
+  width: 80%;
+}
+
+h1 {
+  margin: 1em;
+}
+
+
+
+.user {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #f2f2f2;
+  grid-column: span 3;
+  border-bottom: solid #333333 1px;
+}
+
+.header {
+  font-weight: bolder;
+}
+
+.header > div {
+  width: 30%;
+}
+
+.user > div {
+  display: inline-block;
+  width: 30%;
+  padding: 1em;
+}
+
+.username {
+  font-weight: bolder;
+}
+
+img {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+}
+
+.sort-button {
+  cursor: pointer;
+  user-select: none;
+  background-color: 
+}
+
+.green {
+  color: green;
+}
+
+.green-bg {
+  background-color: rgb(218, 218, 218);
+}

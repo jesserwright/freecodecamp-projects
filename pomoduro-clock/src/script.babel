@@ -1,0 +1,221 @@
+
+function makeHumanReadable(ms) {
+  const seconds = Math.floor((ms / 1000) % 60)
+  const minutes = Math.floor((ms / 1000 / 60) % 60)
+  return [minutes,seconds]
+          .map(val => val.toString().padStart(2, '0'))
+          .join(':')
+}
+
+class App extends React.Component {
+  state = {
+      workTime: 1200000,
+      breakTime: 300000,
+      timeRemaining: 1200000,
+      runningSince: null,
+      nextTimer: 'breakTime',
+      currentTimer: 'workTime'
+  }
+
+  componentDidMount() {
+    this.forceUpdateInterval = setInterval(() => this.forceUpdate(), 50)
+  }
+  componentWillUnmount() {
+    clearInterval(this.forceUpdateInterval)
+  }
+
+  handleTimeChange = (posNeg, timeSettingType) => {
+    // Add or subtract 1 min. Do not allow below 0 or over 60 mins.
+    const changeTime = this.state[timeSettingType] + (60000 * posNeg)
+
+    if (posNeg > 0) {
+      if (this.state[timeSettingType] === 3600000) {
+        timeSettingType === 'workTime' ?
+          this.setState({workTime: 0, timeRemaining: 0}):
+          this.setState({breakTime: 0})
+      } else {
+        timeSettingType === 'workTime' ?
+          this.setState({workTime: changeTime, timeRemaining: changeTime}):
+          this.setState({breakTime: changeTime})
+      }
+
+    } else if (posNeg < 0 && this.state[timeSettingType] > 0) {
+      timeSettingType === 'workTime' ?
+        this.setState({workTime: changeTime, timeRemaining: changeTime}):
+        this.setState({breakTime: changeTime})
+    }
+
+  }
+
+  handleStart = () => {
+    if (!!!this.state.runningSince) {
+      this.setState({
+        timeRemaining: this.state[this.state.currentTimer],
+        runningSince: Date.now(),
+      })
+    } else {
+      this.setState({
+        timeRemaining: this.state[this.state.nextTimer],
+        runningSince: Date.now(),
+        nextTimer: this.state.currentTimer,
+        currentTimer: this.state.nextTimer,
+      })
+    }
+
+  }
+
+  handleStop = () => {
+    this.setState({
+      runningSince: null,
+      timeRemaining: this.state.timeRemaining - (Date.now() - this.state.runningSince)
+    })
+  }
+
+  handleReset = () => {
+    this.setState({
+      workTime: 1200000,
+      breakTime: 300000,
+      timeRemaining: 1200000,
+      runningSince: null,
+      nextTimer: 'breakTime',
+      currentTimer: 'workTime'
+    })
+  }
+
+  handleResume = () => {
+    this.setState({
+      runningSince: Date.now(),
+    })
+  }
+
+  render() {
+
+    const calculatedTime = this.state.timeRemaining - (Date.now() - this.state.runningSince)
+    const currentTimerText = this.state.currentTimer === 'breakTime' ? 'Break' : 'Work'
+    const nextTimerText = this.state.nextTimer === 'breakTime' ? 'Break' : 'Work'
+
+    const timerIsDone = (calculatedTime <= 0 && !!this.state.runningSince)
+    const isPaused = (!!!this.state.runningSince && (this.state.workTime !== this.state.timeRemaining))
+
+    return(
+
+      <div className='element-main'>
+
+        <h2>Pomodoro Timer <i className="time icon"></i></h2>
+
+          <h4 className="ui horizontal divider header">
+            Settings
+          </h4>
+
+          <div className='ui segments'>
+            <Settings
+              timeChange={this.handleTimeChange}
+              sessionName={'Work'}
+              sessionSetting={this.state.workTime}
+              settingType={'workTime'}
+              runningSince={this.state.runningSince}
+              timeRemaining={this.state.timeRemaining}
+              workTime={this.state.workTime}
+            />
+            <Settings
+              timeChange={this.handleTimeChange}
+              sessionName={'Break'}
+              sessionSetting={this.state.breakTime}
+              settingType={'breakTime'}
+              runningSince={this.state.runningSince}
+              timeRemaining={this.state.timeRemaining}
+              workTime={this.state.workTime}
+            />
+          </div>
+
+          <h4 className="ui horizontal divider header">
+            {timerIsDone ? nextTimerText : currentTimerText} Time Remaining
+          </h4>
+
+
+          <h1>
+            {
+              (!!this.state.runningSince && calculatedTime > 0)&&
+              makeHumanReadable(calculatedTime)
+            }
+            {
+              (!!!this.state.runningSince && this.state.timeRemaining > 0)&&
+              makeHumanReadable(this.state.timeRemaining)
+            }
+            {
+              (calculatedTime < 0 && !!this.state.runningSince)&&
+              makeHumanReadable(this.state[this.state.nextTimer])
+            }
+          </h1>
+
+          <div className='ui divider'></div>
+
+          {
+            ((timerIsDone) // timer is still running and is below 0 (timer is done)
+            ||
+            ((!!!this.state.runningSince && (this.state.workTime === this.state.timeRemaining)))) // timer is not running and and in edit mode
+            &&
+            (
+              <button className="green ui right labeled icon basic button" onClick={this.handleStart}>
+                Start {timerIsDone ? nextTimerText : currentTimerText} Timer<i className="play icon"></i>
+              </button>
+            )
+          }
+
+          {
+            (!!this.state.runningSince && this.state.timeRemaining !== 0 && calculatedTime > 0) // If timer is running
+            &&
+            (<button className="red ui right labeled icon basic button" onClick={this.handleStop}>
+              Pause<i className="pause icon"></i>
+            </button>)
+          }
+
+          {
+            isPaused // If timer is paused
+            &&
+            (
+              <div className=''>
+                <button className="green ui right labeled icon basic button" onClick={this.handleResume}>
+                  Resume<i className="play icon"></i>
+                </button>
+                <button className="red ui right labeled icon basic button" onClick={this.handleReset}>
+                  Reset<i className="refresh icon"></i>
+                </button>
+
+              </div>
+            )
+          }
+
+
+      </div>
+    )
+  }
+}
+
+class Settings extends React.Component {
+  changeTimeButton = () => {
+    this.props.timeChange(1, this.props.settingType)
+  }
+  changeTimeButtonNeg = () => {
+    this.props.timeChange(-1, this.props.settingType)
+  }
+
+  render() {
+    const isEdit = (!!!this.props.runningSince && (this.props.workTime === this.props.timeRemaining))
+    return(
+      <div className='ui segment'>
+
+        <h3>{this.props.sessionName}</h3 >
+
+        <div className="ui buttons">
+          <button className={`ui button large compact ${!isEdit && 'disabled'}`} onClick={this.changeTimeButtonNeg}>-</button>
+          <button className={`ui button large compact ${!isEdit && 'disabled'}`}>{makeHumanReadable(this.props.sessionSetting)}</button>
+          <button className={`ui button large compact ${!isEdit && 'disabled'}`} onClick={this.changeTimeButton}>+</button>
+        </div>
+
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));

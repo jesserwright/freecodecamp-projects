@@ -1,0 +1,66 @@
+class App extends React.Component {
+  state = {
+    weatherData: null,
+    latitude: 'none',
+    longitude: 'none',
+    mode: 'fahrenheit',
+    _isLoading: false,
+  }
+
+  getWeather = () => {
+    this.setState({_isLoading: true})
+    navigator.geolocation.getCurrentPosition(
+      (pos => {
+        const lat = pos.coords.latitude
+        const long = pos.coords.longitude
+        this.setState({latitude: lat, longitude: long, _isLoading: false})
+        fetch(`https://fcc-weather-api.glitch.me/api/current?lat=${lat}&lon=${long}`)
+          .then(response => response.json())
+          .then(data => {this.setState({weatherData: data})})
+      }),
+      (err => console.log(err.code)))
+  }
+
+  changeToC = () => {this.setState({mode: 'celsius'})}
+  changeToF = () => {this.setState({mode: 'fahrenheit'})}
+
+  render() {
+    const weatherData = this.state.weatherData
+    const isC = this.state.mode === 'celsius'
+    return (
+    <div className="element-main">
+        <h2>Local Weather <i className="sun icon"></i></h2>
+
+        <div className="ui hidden divider"></div>
+          <button className={`ui right labeled icon button large ${this.state._isLoading && 'disabled'}`} onClick={this.getWeather}>
+            Get Local Weather <i className="angle right icon"></i>
+          </button>
+
+          <div className="ui hidden divider"></div>
+
+            {this.state._isLoading && (
+              <div>
+                <div className="ui basic label"><i className="point icon"></i>Requires browser location to be enabled</div>
+                <div className="ui hidden divider"></div>
+                <div className="ui active inline loader"></div>
+              </div>
+            )}
+
+              {(weatherData && !this.state._isLoading) && (
+                <div className='ui segment'>
+                  <h3>{weatherData.name}</h3>
+                  <h3>{!isC ? (((weatherData.main.temp * 9) / 5) + 32) : weatherData.main.temp}{'°  and  '}{weatherData.weather[0].main}</h3>
+                  <div className='ui basic buttons'>
+                    <div className={`ui button compact ${!isC && 'active'}`} onClick={this.changeToF}>°F</div>
+                    <div className={`ui button compact ${isC && 'active'}`} onClick={this.changeToC}>°C</div>
+                  </div>
+                  <h3>Location:</h3>
+                  <p>{this.state.longitude}, {this.state.latitude}</p>
+                </div>
+              )}
+            </div>
+    );
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));

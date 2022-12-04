@@ -1,0 +1,115 @@
+class App extends React.Component {  
+  
+  state = {
+    board: ['','','','','','','','',''],
+    player: '',
+    weHaveWinner: false,
+    gameIsRunning: false
+  }
+
+  symbolPick = (evt) => {
+    this.setState({
+      player: evt.target.id,
+      gameIsRunning: true,
+    })
+  }
+
+  resetGame = () => {
+    this.setState({
+      board: ['','','','','','','','',''],
+      player: '',
+      weHaveWinner: false,
+      gameIsRunning: false,
+    })
+  }
+
+  handlePlaceMove = (evt) => {
+    const id = evt.target.getAttribute('value')
+
+    const board = this.state.board
+    const solutions = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+    const currentSymbol = this.state.player
+
+    const isOccupied = board[id].length < 1
+    const newBoard = board.map((val, idx) =>
+      // eslint-disable-next-line
+      (idx == id && isOccupied) ? (val = currentSymbol) : (val)
+    )
+
+    const checkWin = solutions.map(solution =>
+      (newBoard[solution[0]] === 'X' &&
+       newBoard[solution[1]] === 'X' &&
+       newBoard[solution[2]] === 'X')
+       ||
+       (newBoard[solution[0]] === 'O' &&
+        newBoard[solution[1]] === 'O' &&
+        newBoard[solution[2]] === 'O')
+       ? 'win' : 'loose')
+    const isWin = checkWin.filter(result => result === 'win').length > 0 && true
+    if (this.state.gameIsRunning) {
+      this.setState({
+        board: newBoard,
+        player: (isOccupied) ? (currentSymbol === "X" ? 'O' : "X") : (currentSymbol),
+        weHaveWinner: isWin
+      })
+    }
+
+  }
+
+  render() {
+    const isWinner = this.state.weHaveWinner
+    const boardNow = this.state.board
+    const playerNow = this.state.player
+    const noWinner = boardNow.join('').length === 9
+
+    const renderedBoard = this.state.board.map((val, idx) => (
+        <div
+          onClick={this.handlePlaceMove}
+          key={idx}
+          value={idx}
+        >
+        {val}
+      </div>
+      ))
+
+    return (
+      <div className='element-main'>
+        <h2>Tic Tac Toe <i className="hashtag icon"></i></h2>
+        <div className='ui segment'>
+          <h2>
+          {
+            isWinner && (playerNow === "X" ? 'Player O Won!' : "Player X Won!")
+          }
+
+          {
+            (noWinner && !isWinner) && "It's a draw!"
+          }
+          {
+            ((!isWinner &&  !noWinner) && (this.state.gameIsRunning)) && (`Player ${playerNow}'s Turn`)
+          }
+          {
+            (!this.state.gameIsRunning) && (
+              <div>
+                <div>Pick Symbol</div>
+                <div className="ui divider"></div>
+                <button className='ui button large' id={'X'} onClick={this.symbolPick}>{"X"}</button>
+                <button className='ui button large' id={'O'} onClick={this.symbolPick}>{"O"}</button>
+              </div>
+            )
+          }
+          </h2>
+
+          {
+             (noWinner || isWinner) && <div onClick={this.resetGame} className='green ui button'>Play Again</div>
+          }
+
+
+        </div>
+        <div className='grid'>
+          {renderedBoard}
+        </div>
+      </div>
+    );
+  }
+}
+ReactDOM.render(<App />, document.getElementById('root'));

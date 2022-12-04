@@ -1,0 +1,42 @@
+class App extends React.Component {
+  state = {
+    bibleVerse: null,
+    bibleRef: null,
+  }
+
+  getVerse = () => {
+    const randomQueryNum = 19001000 + (Math.floor(Math.random()*9) * 10000)
+    const randomQuery = `${randomQueryNum}-${randomQueryNum+5}`
+    fetch(`https://api.esv.org/v3/passage/text/?q=${randomQuery}&include-passage-references=false&include-first-verse-numbers=false&include-verse-numbers=false&include-footnotes=false
+`, {
+      headers: {
+      'Authorization': 'Token b96c215fb2619d00512c3c1766d7be45e0a7f740'
+      }
+    })
+      .then(response => response.json())
+      .then(data => this.setState({bibleVerse: data.passages, bibleRef: data.canonical}))
+  }
+
+  render() {
+    return (
+      <div className="element-main">
+
+          <h2>Random Bible Verse <i className="book icon"></i></h2>
+
+          <button className={`ui right labeled icon button large`} onClick={this.getVerse}>
+            Generate<i className="angle right icon"></i>
+          </button>
+
+          {!!this.state.bibleVerse && (
+            <div className='ui segment'>
+              <p>{this.state.bibleVerse}</p>
+              <h3>{this.state.bibleRef}</h3>
+            </div>
+          )}
+
+        </div>
+      )
+    }
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
